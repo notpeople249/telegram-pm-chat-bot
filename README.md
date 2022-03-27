@@ -2,9 +2,10 @@
 
 Telegram 私聊机器人
 Telegram Private Message Chat Bot
-Original Source From: https://github.com/Netrvin/telegram-pm-chat-bot
 
 **本项目已进入随缘更新状态，如您对使用 `.NET` 没有意见的话，可考虑使用 [pmcenter](https://github.com/Elepover/pmcenter) 作为PM机器人的解决方案**
+
+Original Source From: https://github.com/Netrvin/telegram-pm-chat-bot
 
 ## 安装 (Installation)
 
