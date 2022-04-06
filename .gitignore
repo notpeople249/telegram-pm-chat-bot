@@ -102,8 +102,3 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-
-1.py
-config.json
-preference.json
-data.json
