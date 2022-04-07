@@ -13,7 +13,7 @@ import threading
 import traceback
 import html
 
-Version_Code = 'v1.1.0'  # 版本号
+Version_Code = 'v2\.1\.0'  # 版本号
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -146,10 +146,7 @@ def process_msg(update: telegram.Update, context: telegram.ext.CallbackContext):
                                 text=LANG['reply_message_failed'])
                     return
                 if preference_list[str(update.message.from_user.id)]['notification']:  # 如果启用消息发送提示
-                    context.bot.send_message(chat_id=update.message.chat_id,
-                            text=LANG['reply_message_sent']
-                            % (preference_list[str(sender_id)]['name'], str(sender_id)),
-                            parse_mode=telegram.ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['reply_message_sent'] % (preference_list[str(sender_id)]['name'], '(tg://user?id=' + str(sender_id) + ' )'),parse_mode=telegram.ParseMode.MARKDOWN_V2)
             else:
                 context.bot.send_message(chat_id=CONFIG['Admin'],
                                  text=LANG['reply_to_message_no_data'])
@@ -164,11 +161,7 @@ def process_msg(update: telegram.Update, context: telegram.ext.CallbackContext):
                 from_chat_id=update.message.chat_id,
                 message_id=update.message.message_id)  # 转发消息
         if fwd_msg.sticker:  # 如果是贴纸，则发送发送者身份提示
-            context.bot.send_message(chat_id=CONFIG['Admin'],
-                             text=LANG['info_data'] 
-                             % (update.message.from_user.full_name, str(update.message.from_user.id)),
-                             parse_mode=telegram.ParseMode.MARKDOWN_V2,
-                             reply_to_message_id=fwd_msg.message_id)
+            context.bot.send_message(chat_id=CONFIG['Admin'], text=LANG['info_data'] % (update.message.from_user.full_name,'(tg://user?id=' + str(update.message.from_user.id) + ' )' ),parse_mode=telegram.ParseMode.MARKDOWN_V2, reply_to_message_id=fwd_msg.message_id)
         if preference_list[str(update.message.from_user.id)]['notification']:  # 如果启用消息发送提示
             context.bot.send_message(chat_id=update.message.from_user.id,text=LANG['message_received_notification'])
         message_list[str(fwd_msg.message_id)] = {}
@@ -191,8 +184,8 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
         context.bot.send_message(chat_id=update.message.chat_id,
                          text='Telegram Private Message Chat Bot\n'
                          + Version_Code
-                         + '\nnull'
-                         )
+                         + '\n[Original Repo](https://github\.com/Netrvin/telegram-pm-chat-bot)\n[Modified Repo](https://github\.com/notpeople249/telegram-pm-chat-bot)'
+                         , parse_mode=telegram.ParseMode.MARKDOWN_V2, disable_web_page_preview=True)
         return
     elif command[0] == 'setadmin': # 设置管理员
         if CONFIG['Admin'] == 0:  # 判断管理员是否未设置
@@ -220,12 +213,7 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
             if update.message.reply_to_message:
                 if str(update.message.reply_to_message.message_id) in message_list:
                     sender_id = message_list[str(update.message.reply_to_message.message_id)]['sender_id']
-                    context.bot.send_message(
-                        chat_id=update.message.chat_id,
-                        text=LANG['info_data']
-                        % (preference_list[str(sender_id)]['name'], str(sender_id)),
-                        parse_mode=telegram.ParseMode.MARKDOWN_V2,
-                        reply_to_message_id=update.message.reply_to_message.message_id)
+                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['info_data'] % (preference_list[str(sender_id)]['name'], '(tg://user?id=' + str(sender_id) + ' )'),parse_mode=telegram.ParseMode.MARKDOWN_V2, reply_to_message_id=update.message.reply_to_message.message_id)
                 else:
                     context.bot.send_message(chat_id=update.message.chat_id,text=LANG['reply_to_message_no_data'])
             else:
@@ -243,8 +231,8 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
                     preference_list[str(sender_id)]['blocked'] = True
                     context.bot.send_message(chat_id=update.message.chat_id,
                             text=LANG['ban_user']
-                            % (preference_list[str(sender_id)]['name'],
-                            str(sender_id)),
+                            % (preference_list[str(sender_id)]['name'], '(tg://user?id=' +
+                            str(sender_id) + ' )'),
                             parse_mode=telegram.ParseMode.MARKDOWN_V2)
                     context.bot.send_message(chat_id=sender_id,text=LANG['be_blocked_alert'])
                 else:
@@ -262,8 +250,8 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
                     preference_list[str(sender_id)]['blocked'] = False
                     context.bot.send_message(chat_id=update.message.chat_id,
                             text=LANG['unban_user']
-                            % (preference_list[str(sender_id)]['name'],
-                            str(sender_id)),
+                            % (preference_list[str(sender_id)]['name'], '(tg://user?id=' + 
+                            str(sender_id) + ' )'),
                             parse_mode=telegram.ParseMode.MARKDOWN_V2)
                     context.bot.send_message(chat_id=sender_id,text=LANG['be_unbanned'])
                 else:
