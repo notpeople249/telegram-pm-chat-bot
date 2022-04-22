@@ -5,15 +5,13 @@ import time
 import json
 import telegram.ext
 import telegram
-import sys
-import datetime
 import os
 import logging
 import threading
 import traceback
 import html
 
-Version_Code = 'v2\.1\.0'  # 版本号
+Version_Code = 'v2\.1\.1'  # 版本号
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -97,13 +95,14 @@ def error_handler(update: object, context:telegram.ext.CallbackContext): # 处�
 
 def process_msg(update: telegram.Update, context: telegram.ext.CallbackContext):  # 处理消息
     global message_list
+    global CONFIG
     init_user(update.message.from_user)
     if CONFIG['Admin'] == 0:  # 如果未设置管理员
         context.bot.send_message(chat_id=update.message.from_user.id,
                          text=LANG['please_setup_first'])
         return
     if update.message.from_user.id == CONFIG['Admin']:  # 如果是管理员发送的消息
-        if update.message.reply_to_message:  # 如果未回复消息
+        if update.message.reply_to_message:  # 如果回复消息
             if str(update.message.reply_to_message.message_id) in message_list:  # 如果消息数据存在
                 msg = update.message
                 sender_id = message_list[str(update.message.reply_to_message.message_id)]['sender_id']
@@ -146,7 +145,7 @@ def process_msg(update: telegram.Update, context: telegram.ext.CallbackContext):
                                 text=LANG['reply_message_failed'])
                     return
                 if preference_list[str(update.message.from_user.id)]['notification']:  # 如果启用消息发送提示
-                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['reply_message_sent'] % (preference_list[str(sender_id)]['name'], '(tg://user?id=' + str(sender_id) + ' )'),parse_mode=telegram.ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['reply_message_sent'] % (preference_list[str(sender_id)]['name'], 'tg://user?id=' + str(sender_id)))
             else:
                 context.bot.send_message(chat_id=CONFIG['Admin'],
                                  text=LANG['reply_to_message_no_data'])
@@ -161,7 +160,7 @@ def process_msg(update: telegram.Update, context: telegram.ext.CallbackContext):
                 from_chat_id=update.message.chat_id,
                 message_id=update.message.message_id)  # 转发消息
         if fwd_msg.sticker:  # 如果是贴纸，则发送发送者身份提示
-            context.bot.send_message(chat_id=CONFIG['Admin'], text=LANG['info_data'] % (update.message.from_user.full_name,'(tg://user?id=' + str(update.message.from_user.id) + ' )' ),parse_mode=telegram.ParseMode.MARKDOWN_V2, reply_to_message_id=fwd_msg.message_id)
+            context.bot.send_message(chat_id=CONFIG['Admin'], text=LANG['info_data'] % (update.message.from_user.full_name,'tg://user?id=' + str(update.message.from_user.id)), reply_to_message_id=fwd_msg.message_id)
         if preference_list[str(update.message.from_user.id)]['notification']:  # 如果启用消息发送提示
             context.bot.send_message(chat_id=update.message.from_user.id,text=LANG['message_received_notification'])
         message_list[str(fwd_msg.message_id)] = {}
@@ -178,7 +177,7 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
             ).lower().split()
     if command[0] == 'start':
         context.bot.send_message(chat_id=update.message.chat_id,
-                         text=LANG['start'])
+                         text=LANG['start'] % (CONFIG['Bot_Name']))
         return
     elif command[0] == 'version':
         context.bot.send_message(chat_id=update.message.chat_id,
@@ -213,7 +212,7 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
             if update.message.reply_to_message:
                 if str(update.message.reply_to_message.message_id) in message_list:
                     sender_id = message_list[str(update.message.reply_to_message.message_id)]['sender_id']
-                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['info_data'] % (preference_list[str(sender_id)]['name'], '(tg://user?id=' + str(sender_id) + ' )'),parse_mode=telegram.ParseMode.MARKDOWN_V2, reply_to_message_id=update.message.reply_to_message.message_id)
+                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['info_data'] % (preference_list[str(sender_id)]['name'], 'tg://user?id=' + str(sender_id)), reply_to_message_id=update.message.reply_to_message.message_id)
                 else:
                     context.bot.send_message(chat_id=update.message.chat_id,text=LANG['reply_to_message_no_data'])
             else:
@@ -229,11 +228,7 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
                 if str(update.message.reply_to_message.message_id) in message_list:
                     sender_id = message_list[str(update.message.reply_to_message.message_id)]['sender_id']
                     preference_list[str(sender_id)]['blocked'] = True
-                    context.bot.send_message(chat_id=update.message.chat_id,
-                            text=LANG['ban_user']
-                            % (preference_list[str(sender_id)]['name'], '(tg://user?id=' +
-                            str(sender_id) + ' )'),
-                            parse_mode=telegram.ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['ban_user'] % (preference_list[str(sender_id)]['name'], 'tg://user?id=' + str(sender_id), str(sender_id)), parse_mode=telegram.ParseMode.HTML)
                     context.bot.send_message(chat_id=sender_id,text=LANG['be_blocked_alert'])
                 else:
                     context.bot.send_message(chat_id=update.message.chat_id,text=LANG['reply_to_message_no_data'])
@@ -248,22 +243,14 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
                 if str(update.message.reply_to_message.message_id) in message_list:
                     sender_id = message_list[str(update.message.reply_to_message.message_id)]['sender_id']
                     preference_list[str(sender_id)]['blocked'] = False
-                    context.bot.send_message(chat_id=update.message.chat_id,
-                            text=LANG['unban_user']
-                            % (preference_list[str(sender_id)]['name'], '(tg://user?id=' + 
-                            str(sender_id) + ' )'),
-                            parse_mode=telegram.ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['unban_user'] % (preference_list[str(sender_id)]['name'], 'tg://user?id=' + str(sender_id)))
                     context.bot.send_message(chat_id=sender_id,text=LANG['be_unbanned'])
                 else:
                     context.bot.send_message(chat_id=update.message.chat_id,text=LANG['reply_to_message_no_data'])
             elif len(command) == 2:
                 if command[1] in preference_list:
                     preference_list[command[1]]['blocked'] = False
-                    context.bot.send_message(chat_id=update.message.chat_id,
-                            text=LANG['unban_user']
-                            % (preference_list[command[1]]['name'],
-                            command[1]),
-                            parse_mode=telegram.ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=update.message.chat_id, text=LANG['unban_user'] % (preference_list[command[1]]['name'], 'tg://user?id=' + command[1]))
                     context.bot.send_message(chat_id=int(command[1]),text=LANG['be_unbanned'])
                 else:
                     context.bot.send_message(chat_id=update.message.chat_id,text=LANG['user_not_found'])
@@ -275,6 +262,8 @@ def process_command(update: telegram.Update, context: telegram.ext.CallbackConte
         if update.message.from_user.id == CONFIG['Admin'] \
             and update.message.chat_id == CONFIG['Admin']:
             context.bot.wrong_method_name()
+        else:
+            context.bot.send_message(chat_id=update.message.chat_id, text=LANG['not_an_admin'])
     else: # 指令不存在
         context.bot.send_message(chat_id=update.message.chat_id, text=LANG['nonexistent_command'])
 

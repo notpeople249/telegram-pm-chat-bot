@@ -11,10 +11,10 @@ Original Source From: https://github.com/Netrvin/telegram-pm-chat-bot
 
 ### 安装准备 (Preparation)
 * 创建Telegram机器人，获取Token
-* 一台外面的服务器，安装好Python和pip，并用pip安装`python-telegram-bot==11.1.0`
+* 一台服务器，安装好Python和pip，并用pip安装`python-telegram-bot`（已更新至ptb 13.11版）
 
 * Create a bot and get its token
-* Install Python and pip, then use pip to install `python-telegram-bot==11.1.0`
+* Install Python and pip, then use pip to install `python-telegram-bot` (Updated to ptb version 13.11)
 
 ### 配置 (Configuration)
 打开`config.json`并配置
@@ -25,7 +25,11 @@ Original Source From: https://github.com/Netrvin/telegram-pm-chat-bot
     "Token": "",
     "//2": "机器人Token",
     "Lang": "zh",
-    "//3": "语言包名称"
+    "//3": "语言包名称",
+    "Record_Channel_ID": "-100123456789",
+    "//4": "错误通知频道/群组（请确保机器人已加入该频道/群组）",
+    "Bot_Name": "",
+    "//5": "/start通知时提示的bot名字，留空将跳过名字"
 }
 ```
 如果在前一步未设置管理员用户ID，第一个对机器人发送`/setadmin`的用户将成为管理员，之后可通过修改`config.json`修改管理员
@@ -38,7 +42,11 @@ Open `config.json` and configure
     "Token": "",
     "//2": "Bot Token",
     "Lang": "en",
-    "//3": "Language Pack Name (Be careful! It's 'en'!)"
+    "//3": "Language Pack Name (Be careful! It's 'en'!)",
+    "Record_Channel_ID": "-100123456789",
+    "//4": "Channel/Group for error logging(Please make sure bot have join that channel/group",
+    "Bot_Name": "",
+    "//5": "/start通知时提示的bot名字，留空将跳过名字"
 }
 ```
 If you didn't set admin's ID previously, the user who sends `/setadmin` to the bot first will become the admin. You can edit `config.json` to change admin later.
@@ -105,3 +113,17 @@ Reply `unban` to a message or send `/unban <User ID>` to unban a user
 | /info                  | Inquire sender identity                    |
 | /ban                   | Ban a user                                 |
 | /unban <ID (optional)> | Unban a user                               |
+
+##Update Progress
+
+- [x] 写一个Pyrogram的
+- [ ] 恢复以超链接方式显示用户名链接
+- [ ] 添加删除功能
+- [ ] 复制[大佬](https://github.com/Tsuk1ko/telegram-pm-chat-bot)的默认回复功能
+- [ ] 在群内使用bot私聊功能
+
+<!-- 
+- [ ] 融合获取kd口令
+- [ ] 自动检查是否在kd群
+- [ ] 外国人获取口令（？）
+-->
